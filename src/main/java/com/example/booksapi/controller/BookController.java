@@ -1,7 +1,9 @@
 package com.example.booksapi.controller;
 
 import com.example.booksapi.model.BookResponse;
+import com.example.booksapi.model.BookSearchRequest;
 import com.example.booksapi.service.OpenLibraryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +16,8 @@ public class BookController {
     private OpenLibraryService openLibraryService;
     
     @GetMapping("/search")
-    public ResponseEntity<BookResponse> searchBooks(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) String filterType,
-            @RequestParam(required = false) String filterValue,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        
-        BookResponse response = openLibraryService.searchBooks(query, filterType, filterValue, page, size);
+    public ResponseEntity<BookResponse> searchBooks(@Valid BookSearchRequest request) {
+        BookResponse response = openLibraryService.searchBooks(request);
         return ResponseEntity.ok(response);
     }
 }

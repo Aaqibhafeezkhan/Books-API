@@ -2,6 +2,7 @@ package com.example.booksapi.service;
 
 import com.example.booksapi.model.Book;
 import com.example.booksapi.model.BookResponse;
+import com.example.booksapi.model.BookSearchRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,36 +20,34 @@ public class OpenLibraryService {
     @Autowired
     private RestTemplate restTemplate;
     
-    public BookResponse searchBooks(String query, String filterType, String filterValue, 
-                                  int page, int size) {
-        String url = buildSearchUrl(query, filterType, filterValue, page, size);
+    public BookResponse searchBooks(BookSearchRequest request) {
+        String url = buildSearchUrl(request);
         JsonNode response = restTemplate.getForObject(url, JsonNode.class);
-        return mapToBookResponse(response, page, size);
+        return mapToBookResponse(response, request.getPage(), request.getSize());
     }
     
-    private String buildSearchUrl(String query, String filterType, String filterValue, 
-                                int page, int size) {
+    private String buildSearchUrl(BookSearchRequest request) {
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromHttpUrl(OPEN_LIBRARY_API_URL)
-            .queryParam("page", page + 1) 
-            .queryParam("limit", size);
+            .queryParam("page", request.getPage() + 1)
+            .queryParam("limit", request.getSize());
 
-        if (filterType != null && filterValue != null) {
-            switch (filterType.toLowerCase()) {
+        if (request.getFilterType() != null) {
+            switch (request.getFilterType().toLowerCase()) {
                 case "author":
-                    builder.queryParam("author", filterValue);
+                    builder.queryParam("author", request.getFilterValue());
                     break;
                 case "subject":
-                    builder.queryParam("subject", filterValue);
+                    builder.queryParam("subject", request.getFilterValue());
                     break;
                 case "isbn":
-                    builder.queryParam("isbn", filterValue);
+                    builder.queryParam("isbn", request.getFilterValue());
                     break;
                 default:
-                    builder.queryParam("q", query);
+                    builder.queryParam("q", request.getQuery());
             }
-        } else if (query != null) {
-            builder.queryParam("q", query);
+        } else if (request.getQuery() != null) {
+            builder.queryParam("q", request.getQuery());
         }
 
         return builder.build().toUriString();
