@@ -51,6 +51,27 @@ curl -X GET "http://localhost:8080/api/books/search?filterType=author&filterValu
 
 ---
 
+### Caching
+
+Book search responses are cached in-process using Caffeine. Identical searches reuse the cached response while entries remain within the configured TTL.
+
+Default configuration:
+
+- **TTL**: 300 seconds.
+- **Maximum entries**: 500.
+- **Cache key**: query, filter type, filter value, page, and size.
+
+Configuration can be overridden with environment variables:
+
+```text
+BOOKS_CACHE_TTL_SECONDS=300
+BOOKS_CACHE_MAX_SIZE=500
+```
+
+The cache is intentionally local to the application instance. A distributed cache such as Redis can be introduced later if multi-instance caching becomes necessary.
+
+---
+
 ### Deployment
 
 #### Local (Docker)
